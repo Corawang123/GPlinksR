@@ -1,0 +1,30 @@
+Package: GPlinksR
+Type: Package
+Title: Building Gene–Peak Network for ATAC–RNA Integration
+Version: 0.1.0
+Authors@R: c(
+    person("Xinran", "Wang", email = "xwang210@usc.edu", role = c("aut", "cre")),
+    person("Kelly", "Street", email = "kelly.street@usc.edu", role = "ctb"))
+Description: GPlinksR provides a simple interface to build gene–peak networks 
+    by integrating enhancer, promoter, and proximity-based (closest-gene) 
+    mapping using public enhancer–gene link data from PANTHER/AnnoQ.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+LazyDataCompression: xz
+Depends: 
+    R (>= 4.1)
+Imports:
+    data.table,
+    GenomicRanges,
+    EnsDb.Hsapiens.v86,
+    ensembldb,
+    biomaRt,
+    dplyr
+biocViews: GeneExpression, Sequencing, Transcriptomics
+Remotes:
+    bioc::EnsDb.Hsapiens.v86,
+    bioc::GenomicRanges,
+    bioc::ensembldb
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
