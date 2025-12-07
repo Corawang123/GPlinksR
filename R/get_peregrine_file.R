@@ -8,6 +8,7 @@
 #' @examples
 #' file_path <- get_peregrine_file(19)
 #' head(readLines(file_path), 3)
+
 get_peregrine_file <- function(version = 19, destdir = tempdir()) {
   if (!version %in% c(17, 18, 19))
     stop("Version must be one of 17, 18, or 19.", call. = FALSE)
