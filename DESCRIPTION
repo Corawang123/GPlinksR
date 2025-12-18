@@ -5,6 +5,8 @@ Version: 0.1.0
 Authors@R: c(
     person("Xinran", "Wang", email = "xwang210@usc.edu", role = c("aut", "cre")),
     person("Kelly", "Street", email = "kelly.street@usc.edu", role = "ctb"))
+    person("Huaiyu", "Mi", email = "huaiyumi@usc.edu", role = "ctb"))
+    person("Bryan", "Queme", email = "queme@usc.edu", role = "ctb"))
 Description:GPlinksR constructs gene–peak regulatory networks for ATAC–RNA 
     integration by combining enhancer-based, promoter-based, and proximity 
     (closest-gene) mappings. Enhancer–gene links are obtained from the 

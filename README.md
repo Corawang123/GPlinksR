@@ -11,5 +11,4 @@ You can install the development version of **GPlinksR** directly from GitHub:
 
 ```r
 # install.packages("devtools")
-devtools::install_github("Corawang123/GPlinksR")
-
+remotes::install_git("git@github.com:Corawang123/GPlinksR.git")
