@@ -1,12 +1,12 @@
-#' Build Gene–Peak Network (Enhancer, Promoter, Closest)
+#' Build Gene-Peak Network (Enhancer, Promoter, Closest)
 #'
 #' @param pk Either:
 #'   (1) A character vector of genomic coordinates ("chr1:1000-1200"), or
 #'   (2) A data.frame containing peak coordinates with columns "chr","start","end"
 #'       or a "PeakRegion" column ("chr1:1000-1200" style).
 #' @param gn Character vector of gene symbols (HGNC official symbols, e.g. "TP53", "FMNL2").
-#' @param ver Integer (17, 18, or 19) — PANTHER enhancer–gene link version.
-#' @param enh_file Optional local path to enhancer–gene link file (.tsv).
+#' @param ver Integer (17, 18, or 19) - PANTHER enhancer-gene link version.
+#' @param enh_file Optional local path to enhancer-gene link file (.tsv).
 #'
 #' @return A data.frame with columns: Peak, Gene, Source.
 #' @export
@@ -32,7 +32,7 @@ build_gp_links <- function(pk, gn, ver = 19, enh_file = NULL) {
 
   # --- Check gene input ---
   if (missing(gn) || is.null(gn) || length(gn) == 0)
-    stop("'gn' must be provided — a non-empty character vector of gene symbols.")
+    stop("'gn' must be provided - a non-empty character vector of gene symbols.")
 
   if (!is.character(gn))
     stop("'gn' must be a character vector (e.g., c('TP53', 'FMNL2')).")
@@ -42,7 +42,7 @@ build_gp_links <- function(pk, gn, ver = 19, enh_file = NULL) {
 
   # --- Check peak input ---
   if (missing(pk) || is.null(pk) || length(pk) == 0)
-    stop("'pk' must be provided — either a character vector or a data.frame.")
+    stop("'pk' must be provided - either a character vector or a data.frame.")
 
   if (is.character(pk)) {
     if (!all(grepl("^chr[0-9XYMT]+:[0-9]+-[0-9]+$", pk))) {
@@ -176,7 +176,7 @@ build_gp_links <- function(pk, gn, ver = 19, enh_file = NULL) {
     stringsAsFactors = FALSE
   ) %>% distinct()
 
-  message("Promoter–gene links found: ", nrow(df_prom))
+  message("Promoter-gene links found: ", nrow(df_prom))
 
 
   # 4. Closest-gene links (EnsDb)
