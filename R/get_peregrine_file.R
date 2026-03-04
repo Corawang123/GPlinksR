@@ -1,6 +1,6 @@
 #' Download Enhancer–Gene Link File from PANTHER Peregrine Database
 #'
-#' @param version Integer (17, 18, or 19). Which PANTHER enhancer–gene link version to download.
+#' @param version Integer (17, 18, or 19). Which PANTHER enhancer-gene link version to download.
 #' @param destdir Directory to save the file. Defaults to a temporary directory.
 #' @return The full path to the downloaded .tsv file.
 #' @export

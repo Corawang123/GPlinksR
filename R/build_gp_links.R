@@ -9,22 +9,19 @@
 #' @param enh_file Optional local path to enhancer-gene link file (.tsv).
 #'
 #' @return A data.frame with columns: Peak, Gene, Source.
+#'
+#' @import data.table
+#' @import GenomicRanges
+#' @import EnsDb.Hsapiens.v86
+#' @importFrom ensembldb transcripts genes promoters
+#' @importFrom biomaRt useMart getBM
+#' @importFrom dplyr distinct filter bind_rows
 #' @export
 #'
 #' @examples
 #' gp <- build_gp_links(c("chr1:819770-822338", "chr1:983871-984475"), c("TTLL10", "PERM1"))
 #' head(gp)
 build_gp_links <- function(pk, gn, ver = 19, enh_file = NULL) {
-
-  suppressPackageStartupMessages({
-    library(data.table)
-    library(GenomicRanges)
-    library(EnsDb.Hsapiens.v86)
-    library(ensembldb)
-    library(biomaRt)
-    library(dplyr)
-  })
-
 
   # 0. Input validation
 
@@ -147,9 +144,9 @@ build_gp_links <- function(pk, gn, ver = 19, enh_file = NULL) {
     Gene = mcols(enh_gr)$sym[subjectHits(hits_enh)],
     Src  = "enh",
     stringsAsFactors = FALSE
-  ) %>% distinct()
+  ) |>  distinct()
 
-  message("Enhancer–gene links found: ", nrow(df_enh))
+  message("Enhancer-gene links found: ", nrow(df_enh))
 
 
   # 3. Promoter-based links (EnsDb)
@@ -174,7 +171,7 @@ build_gp_links <- function(pk, gn, ver = 19, enh_file = NULL) {
     Gene = prom_gr$symbol[subjectHits(hits_prom)],
     Src  = "prom",
     stringsAsFactors = FALSE
-  ) %>% distinct()
+  ) |>  distinct()
 
   message("Promoter-gene links found: ", nrow(df_prom))
 
@@ -203,16 +200,16 @@ build_gp_links <- function(pk, gn, ver = 19, enh_file = NULL) {
     Gene = tx_gene$symbol[nearest_hits],
     Src  = "clo",
     stringsAsFactors = FALSE
-  ) %>%
-    dplyr::filter(!is.na(Gene)) %>%
-    dplyr::distinct()
+  ) |>
+    filter(!is.na(Gene)) |>
+    distinct()
 
-  message("Closest–gene links found: ", nrow(df_clo))
+  message("Closest-gene links found: ", nrow(df_clo))
 
 
   # 5. Combine and return
 
-  df_all <- bind_rows(df_enh, df_prom, df_clo) %>% distinct()
+  df_all <- bind_rows(df_enh, df_prom, df_clo) |>  distinct()
   message("Total combined links: ", nrow(df_all))
 
   return(df_all)

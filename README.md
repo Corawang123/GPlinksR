@@ -1,7 +1,7 @@
 # GPlinksR
 
 **GPlinksR** builds **gene–peak networks** for multi-omics integration by combining enhancer-, promoter-, and proximity-based (closest-gene) mapping.  
-It uses public enhancer–gene link data from **PANTHER / PEREGRINE (AnnoQ)**.
+It uses public enhancer-gene link data from **PANTHER / PEREGRINE (AnnoQ)**.
 
 ---
 
