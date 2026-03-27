@@ -2,22 +2,24 @@
 % Please edit documentation in R/get_peregrine_file.R
 \name{get_peregrine_file}
 \alias{get_peregrine_file}
-\title{Download Enhancer–Gene Link File from PANTHER Peregrine Database}
+\title{Download Enhancer-Gene Link File from PANTHER Peregrine Database}
 \usage{
-get_peregrine_file(version = 19, destdir = tempdir())
+get_peregrine_file(version = 19)
 }
 \arguments{
-\item{version}{Integer (17, 18, or 19). Which PANTHER enhancer–gene link version to download.}
-
-\item{destdir}{Directory to save the file. Defaults to a temporary directory.}
+\item{version}{Integer (17, 18, or 19). Which PANTHER enhancer-gene link
+version to download.}
 }
 \value{
-The full path to the downloaded .tsv file.
+The full path to the downloaded \code{.tsv} file stored in the
+\code{BiocFileCache}.
 }
 \description{
-Download Enhancer–Gene Link File from PANTHER Peregrine Database
+Download Enhancer-Gene Link File from PANTHER Peregrine Database
 }
 \examples{
-file_path <- get_peregrine_file(19)
-head(readLines(file_path), 3)
+f <- get_peregrine_file(19)
+f
+# inspect the first few lines
+readLines(f, n = 3)
 }

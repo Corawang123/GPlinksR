@@ -1,0 +1,18 @@
+CHANGES IN VERSION 0.1.0
+
+NEW FEATURES
+
+    o Added build_gp_links_wrapper() to support MultiAssayExperiment,
+      SingleCellExperiment, and SummarizedExperiment inputs.
+
+    o Added packaged example data via gp_example_inputs.
+
+    o Added a Bioconductor-style vignette demonstrating direct and
+      container-based workflows.
+
+FIXES
+
+    o Improved build_gp_links() handling of empty overlap cases so
+      sparse inputs return empty results instead of errors.
+
+    o Updated the closest-gene mapping to use gene TSS positions.

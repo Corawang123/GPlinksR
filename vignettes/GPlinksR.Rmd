@@ -1,0 +1,245 @@
+---
+title: "GPlinksR: Building Gene-Peak Links from Simulated Single-Cell Inputs"
+author: "Xinran Wang, Kelly Street, Huaiyu Mi, and Bryan Queme"
+date: "`r Sys.Date()`"
+bibliography: bibFile.bib
+output:
+    BiocStyle::html_document:
+        toc: true
+vignette: >
+    %\VignetteIndexEntry{GPlinksR: Gene-Peak Links from Simulated Inputs}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE,
+    eval = TRUE,
+    message = FALSE,
+    warning = FALSE
+)
+set.seed(123)
+library(GPlinksR)
+```
+
+# Introduction
+
+`GPlinksR` constructs gene-peak regulatory links by combining three sources of
+evidence: enhancer-based links, promoter overlaps, and nearest-gene mappings.
+The package is designed for ATAC-RNA integration workflows where users already
+have a set of peaks and a set of genes, but it also includes a wrapper that can
+extract these inputs from common Bioconductor containers such as
+`SingleCellExperiment` [@SingleCellExperiment] and
+`MultiAssayExperiment` [@MultiAssayExperiment].
+
+This vignette uses a small built-in example dataset to demonstrate how to
+prepare inputs, how to run the main function, and how to use the wrapper when
+your data are already stored in Bioconductor containers.
+
+If you are running these chunks manually from the package source directory
+rather than knitting the vignette, load the current source package first with
+`devtools::load_all(".")` so that you use the local development version rather
+than an older installed copy.
+
+# Overview
+
+The core function in `GPlinksR` is `build_gp_links()`. It expects:
+
+* `pk`: peak coordinates in `"chr:start-end"` format, or a data.frame with
+    peak coordinate columns.
+* `gn`: a character vector of gene symbols.
+
+For users working with single-cell analysis objects, `build_gp_links_wrapper()`
+can extract these inputs automatically and pass them to `build_gp_links()`.
+
+# Minimal Example with Peak and Gene Vectors
+
+We begin with the package example dataset, which contains 300 peak coordinates
+and 100 gene symbols prepared for demonstration purposes.
+
+```{r simulated-inputs}
+data("gp_example_inputs", package = "GPlinksR")
+
+pk <- gp_example_inputs$pk
+gn <- gp_example_inputs$gn
+
+length(pk)
+length(gn)
+```
+
+At this point, the main function can be called directly:
+
+```{r direct-run, eval=FALSE}
+gp <- build_gp_links(pk = pk, gn = gn)
+head(gp)
+```
+
+If you want to use a previously cached PEREGRINE file, you may first download
+or retrieve it with:
+
+```{r cached-enhancer-file, eval=FALSE}
+enh_file <- get_peregrine_file(19)
+gp <- build_gp_links(pk = pk, gn = gn, enh_file = enh_file)
+```
+
+# Using a Peak Data Frame
+
+Some users store peaks as separate chromosome, start, and end columns. This is
+also supported.
+
+```{r peak-data-frame}
+peak_parts <- do.call(rbind, strsplit(pk[seq_len(6)], "[:-]"))
+peak_df <- data.frame(
+    chr = peak_parts[, 1],
+    start = as.integer(peak_parts[, 2]),
+    end = as.integer(peak_parts[, 3])
+)
+
+peak_df
+```
+
+This can be supplied directly to `build_gp_links()`:
+
+```{r data-frame-run, eval=FALSE}
+gp <- build_gp_links(pk = peak_df, gn = gn)
+```
+
+# Wrapper Workflow for MultiAssayExperiment
+
+For many Bioconductor workflows, peaks and genes are already stored in a
+`MultiAssayExperiment`. In that setting, the wrapper lets users specify which
+experiment contains peaks and which contains genes, and then handles the input
+extraction automatically.
+
+The following code shows a simple simulated setup. Here, the RNA experiment is
+represented by a `SummarizedExperiment` [@SummarizedExperiment], while the ATAC
+experiment stores peak ranges.
+
+```{r mae-setup}
+if (requireNamespace("MultiAssayExperiment", quietly = TRUE) &&
+    requireNamespace("SummarizedExperiment", quietly = TRUE) &&
+    requireNamespace("IRanges", quietly = TRUE)) {
+    library(MultiAssayExperiment)
+    library(SummarizedExperiment)
+    library(GenomicRanges)
+    library(IRanges)
+    library(S4Vectors)
+
+    sample_ids <- paste0("cell", seq_len(4))
+
+    atac_counts <- matrix(sample.int(10, 12, TRUE), nrow = 3)
+    colnames(atac_counts) <- sample_ids
+
+    atac_se <- SummarizedExperiment(
+        assays = list(counts = atac_counts),
+        rowRanges = GRanges(
+            seqnames = c("chr1", "chr1", "chr2"),
+            ranges = IRanges(
+                start = c(100000, 205000, 310000),
+                end = c(100200, 205300, 310250)
+            )
+        )
+    )
+
+    rna_counts <- matrix(sample.int(10, 12, TRUE), nrow = 3)
+    colnames(rna_counts) <- sample_ids
+
+    rna_se <- SummarizedExperiment(
+        assays = list(counts = rna_counts),
+        rowData = DataFrame(
+            symbol = gn[seq_len(3)]
+        )
+    )
+
+    mae <- MultiAssayExperiment(
+        experiments = list(ATAC = atac_se, RNA = rna_se),
+        colData = S4Vectors::DataFrame(row.names = sample_ids)
+    )
+}
+```
+
+Once the object has been created, the wrapper call is concise:
+
+```{r mae-run, eval=FALSE}
+gp <- build_gp_links_wrapper(
+    x = mae,
+    peak_experiment = "ATAC",
+    gene_experiment = "RNA",
+    gene_col = "symbol"
+)
+
+head(gp)
+```
+
+# Wrapper Workflow for SingleCellExperiment
+
+The wrapper also supports a `SingleCellExperiment` [@SingleCellExperiment]
+workflow in which gene-level measurements are stored in the main object and peak
+features are stored in an `altExp()`.
+
+```{r sce-setup}
+if (requireNamespace("SingleCellExperiment", quietly = TRUE) &&
+    requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+    library(SingleCellExperiment)
+    library(SummarizedExperiment)
+    library(S4Vectors)
+
+    rna_counts <- matrix(sample.int(10, 20, TRUE), nrow = 4)
+    rownames(rna_counts) <- gn[seq_len(4)]
+
+    peak_counts <- matrix(sample.int(10, 15, TRUE), nrow = 3)
+    peak_rowdata <- DataFrame(
+        PeakRegion = c(
+            pk[1],
+            pk[2],
+            pk[3]
+        )
+    )
+
+    sce <- SingleCellExperiment(
+        assays = list(counts = rna_counts),
+        rowData = DataFrame(symbol = rownames(rna_counts))
+    )
+
+    altExp(sce, "ATAC") <- SummarizedExperiment(
+        assays = list(counts = peak_counts),
+        rowData = peak_rowdata
+    )
+}
+```
+
+The wrapper then extracts genes from the main object and peaks from the named
+alternative experiment:
+
+```{r sce-run, eval=FALSE}
+gp <- build_gp_links_wrapper(
+    x = sce,
+    peak_experiment = "ATAC",
+    gene_col = "symbol"
+)
+
+head(gp)
+```
+
+# Input Expectations
+
+The wrapper is intended to reduce the amount of manual preprocessing required by
+new users, but a few object conventions are still important:
+
+* Peak features should ultimately resolve to coordinates in
+    `"chr:start-end"` format.
+* Gene features should ultimately resolve to gene symbols.
+* For `MultiAssayExperiment` input, peak and gene experiments should be named
+    explicitly.
+* For `SingleCellExperiment` input, the main object is assumed to contain genes
+    and `altExp()` is assumed to contain peaks.
+
+If your object uses different column names, you can point the wrapper to them
+with `peak_col` and `gene_col`.
+
+# Session Info
+
+```{r session}
+sessionInfo()
+```

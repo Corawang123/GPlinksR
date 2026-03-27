@@ -1,43 +1,55 @@
-#' Download Enhancer–Gene Link File from PANTHER Peregrine Database
+#' Download Enhancer-Gene Link File from PANTHER Peregrine Database
 #'
-#' @param version Integer (17, 18, or 19). Which PANTHER enhancer-gene link version to download.
-#' @param destdir Directory to save the file. Defaults to a temporary directory.
-#' @return The full path to the downloaded .tsv file.
+#' @param version Integer (17, 18, or 19). Which PANTHER enhancer-gene link
+#'   version to download.
+#' @return The full path to the downloaded `.tsv` file stored in the
+#'   `BiocFileCache`.
+#'
 #' @export
 #'
 #' @examples
-#' file_path <- get_peregrine_file(19)
-#' head(readLines(file_path), 3)
+#' f <- get_peregrine_file(19)
+#' f
+#' # inspect the first few lines
+#' readLines(f, n = 3)
+get_peregrine_file <- function(version = 19) {
+    if (!requireNamespace("BiocFileCache", quietly = TRUE)) {
+        stop("Package 'BiocFileCache' must be installed.")
+    }
 
-get_peregrine_file <- function(version = 19, destdir = tempdir()) {
-  if (!version %in% c(17, 18, 19))
-    stop("Version must be one of 17, 18, or 19.", call. = FALSE)
+    if (!version %in% c(17, 18, 19)) {
+        stop("Version must be 17, 18, or 19.")
+    }
 
-  base_url <- "https://data.pantherdb.org/ftp/peregrine_data/"
-  fname <- paste0("enhancer_gene_link_", version, ".tsv")
-  file_url <- paste0(base_url, fname)
-  dest_file <- file.path(destdir, fname)
+    url <- paste0(
+        "https://data.pantherdb.org/ftp/peregrine_data/",
+        "enhancer_gene_link_", version, ".tsv"
+    )
 
-  if (!file.exists(dest_file)) {
-    message("Downloading ", fname, " from PANTHER FTP...")
+    bfc <- BiocFileCache::BiocFileCache(ask = FALSE)
 
-    # extend timeout temporarily
-    old_timeout <- getOption("timeout")
-    options(timeout = max(600, old_timeout))  # extend to 10 minutes
+    rname <- paste0("peregrine_v", version)
 
-    tryCatch({
-      utils::download.file(file_url, destfile = dest_file, mode = "wb", quiet = FALSE)
-      message("Download complete: ", dest_file)
-    }, error = function(e) {
-      stop("Failed to download enhancer file from ", file_url, call. = FALSE)
-    }, finally = {
-      options(timeout = old_timeout)
-    })
-  } else {
-    message("Using cached file: ", dest_file)
-  }
+    query <- BiocFileCache::bfcquery(
+        bfc,
+        rname,
+        field = "rname"
+    )
 
-  return(dest_file)
+    if (nrow(query) == 0) {
+        message("Downloading PEREGRINE enhancer file...")
+
+        rid <- names(
+            BiocFileCache::bfcadd(
+                bfc,
+                rname = rname,
+                fpath = url
+            )
+        )
+    } else {
+        message("Using cached PEREGRINE file.")
+        rid <- query$rid[1]
+    }
+
+    BiocFileCache::bfcpath(bfc, rid)
 }
-
-

@@ -3,31 +3,50 @@ Type: Package
 Title: Building Gene-Peak Network for ATAC-RNA Integration
 Version: 0.1.0
 Authors@R: c(
-    person("Xinran", "Wang", email = "xwang210@usc.edu", role = c("aut", "cre")),
+    person(
+        "Xinran", "Wang",
+        email = "xwang210@usc.edu",
+        role = c("aut", "cre"),
+        comment = c(ORCID = "0009-0000-1805-3280")
+    ),
     person("Kelly", "Street", email = "kelly.street@usc.edu", role = "ctb"),
     person("Huaiyu", "Mi", email = "huaiyumi@usc.edu", role = "ctb"),
     person("Bryan", "Queme", email = "queme@usc.edu", role = "ctb"))
-Description:GPlinksR constructs gene-peak regulatory networks for ATAC-RNA 
+Description: GPlinksR constructs gene-peak regulatory networks for ATAC-RNA
     integration by combining enhancer-based, promoter-based, and proximity 
-    (closest-gene) mappings. Enhancer-gene links are obtained from the 
-    PEREGRINE enhancer-gene datasets provided by AnnoQ, while promoter 
-    and gene coordinates are retrieved from EnsDb.Hsapiens.v86.
+    (closest-gene) mappings. The package accepts direct peak and gene
+    vectors as well as container-based inputs through a wrapper for
+    common Bioconductor object classes. Enhancer-gene links are obtained
+    from the PEREGRINE enhancer-gene datasets provided by AnnoQ, while
+    promoter and gene coordinates are retrieved from EnsDb.Hsapiens.v86.
 License: MIT + file LICENSE
+URL: https://github.com/Corawang123/GPlinksR
+BugReports: https://github.com/Corawang123/GPlinksR/issues
 Encoding: UTF-8
-LazyData: true
-LazyDataCompression: xz
 Depends: 
-    R (>= 4.1)
+    R (>= 4.4.0)
 Imports:
+    BiocFileCache,
     data.table,
     GenomicRanges,
+    GenomeInfoDb,
+    methods,
+    MultiAssayExperiment,
+    S4Vectors,
     EnsDb.Hsapiens.v86,
     ensembldb,
     biomaRt,
-    dplyr
-biocViews: GeneExpression, Sequencing, Transcriptomics
+    dplyr,
+    SingleCellExperiment,
+    SummarizedExperiment
+biocViews: GeneExpression, Network, Sequencing, Transcriptomics
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Suggests: 
+    BiocStyle,
+    IRanges,
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
+VignetteBuilder: knitr
 Config/testthat/edition: 3

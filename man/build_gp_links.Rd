@@ -2,24 +2,35 @@
 % Please edit documentation in R/build_gp_links.R
 \name{build_gp_links}
 \alias{build_gp_links}
-\title{Build Gene–Peak Network (Enhancer, Promoter, Closest)}
+\title{Build Gene-Peak Network (Enhancer, Promoter, Closest)}
 \usage{
 build_gp_links(pk, gn, ver = 19, enh_file = NULL)
 }
 \arguments{
 \item{pk}{Either:
 (1) A character vector of genomic coordinates ("chr1:1000-1200"), or
-(2) A data.frame containing columns "chr","start","end" or "PeakRegion".}
+(2) A data.frame containing peak coordinates with columns
+"chr","start","end" or a "PeakRegion" column
+("chr1:1000-1200" style).}
 
-\item{gn}{Character vector of HGNC gene symbols (e.g., "TP53", "FMNL2").}
+\item{gn}{Character vector of gene symbols
+(HGNC official symbols, e.g. "TP53", "FMNL2").}
 
-\item{ver}{Integer (17, 18, or 19) — PANTHER enhancer–gene link version.}
+\item{ver}{Integer (17, 18, or 19) - PANTHER enhancer-gene link version.}
 
-\item{enh_file}{Optional path to enhancer–gene link file (.tsv).}
+\item{enh_file}{Optional local path to enhancer-gene link file (.tsv).}
 }
 \value{
-Data frame with columns: Peak, Gene, Src (enh/prom/clo)
+A data.frame with columns: Peak, Gene, Source.
+Closest-gene mappings are based on distance from each peak to gene TSS.
 }
 \description{
-Build Gene–Peak Network (Enhancer, Promoter, Closest)
+Build Gene-Peak Network (Enhancer, Promoter, Closest)
+}
+\examples{
+pk <- c("chr1:819770-822338", "chr1:983871-984475")
+gn <- c("TTLL10", "PERM1")
+
+gp <- build_gp_links(pk, gn)
+head(gp)
 }
