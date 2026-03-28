@@ -53,3 +53,39 @@ get_peregrine_file <- function(version = 19) {
 
     BiocFileCache::bfcpath(bfc, rid)
 }
+
+
+.get_peregrine_enhancer_coords_file <- function() {
+    if (!requireNamespace("BiocFileCache", quietly = TRUE)) {
+        stop("Package 'BiocFileCache' must be installed.")
+    }
+
+    url <- paste0(
+        "https://data.pantherdb.org/ftp/peregrine_data/",
+        "PEREGRINEenhancershg38"
+    )
+    bfc <- BiocFileCache::BiocFileCache(ask = FALSE)
+    rname <- "peregrine_enhancers_hg38"
+
+    query <- BiocFileCache::bfcquery(
+        bfc,
+        rname,
+        field = "rname"
+    )
+
+    if (nrow(query) == 0) {
+        message("Downloading PEREGRINE enhancer coordinates...")
+        rid <- names(
+            BiocFileCache::bfcadd(
+                bfc,
+                rname = rname,
+                fpath = url
+            )
+        )
+    } else {
+        message("Using cached PEREGRINE enhancer coordinates.")
+        rid <- query$rid[1]
+    }
+
+    BiocFileCache::bfcpath(bfc, rid)
+}

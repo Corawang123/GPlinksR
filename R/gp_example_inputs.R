@@ -2,7 +2,8 @@
 #'
 #' A small example dataset for demonstrating `GPlinksR` workflows. The object
 #' contains 300 peak coordinates and 100 gene symbols suitable for examples and
-#' vignettes.
+#' vignettes. The first few entries are curated so that the vignette examples
+#' produce enhancer-, promoter-, and closest-based links from the packaged data.
 #'
 #' @format A list with two elements:
 #' \describe{

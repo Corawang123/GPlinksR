@@ -170,6 +170,27 @@ test_that("build_gp_links errors when enh_file does not exist", {
 test_that("build_gp_links errors when gene symbols cannot be mapped to HGNC", {
     skip_on_cran() # biomaRt lookup
 
+    mart_available <- tryCatch(
+        {
+            mart <- biomaRt::useMart(
+                "ensembl",
+                dataset = "hsapiens_gene_ensembl"
+            )
+            biomaRt::getBM(
+                attributes = "hgnc_symbol",
+                filters = "hgnc_symbol",
+                values = "TP53",
+                mart = mart
+            )
+            TRUE
+        },
+        error = function(e) FALSE
+    )
+
+    if (!mart_available) {
+        skip("biomaRt service unavailable")
+    }
+
     expect_error(
         build_gp_links(
             pk = "chr1:1000-2000",

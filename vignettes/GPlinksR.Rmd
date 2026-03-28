@@ -60,6 +60,7 @@ and 100 gene symbols prepared for demonstration purposes.
 
 ```{r simulated-inputs}
 data("gp_example_inputs", package = "GPlinksR")
+data("gp_example_links", package = "GPlinksR")
 
 pk <- gp_example_inputs$pk
 gn <- gp_example_inputs$gn
@@ -68,10 +69,29 @@ length(pk)
 length(gn)
 ```
 
+For the executable examples below, we use a small deterministic subset of the
+packaged data that is arranged to yield enhancer-, promoter-, and closest-based
+links.
+
+```{r demo-subset}
+pk_demo <- pk[seq_len(3)]
+gn_demo <- gn[seq_len(4)]
+
+pk_demo
+gn_demo
+```
+
 At this point, the main function can be called directly:
 
 ```{r direct-run, eval=FALSE}
-gp <- build_gp_links(pk = pk, gn = gn)
+gp <- build_gp_links(pk = pk_demo, gn = gn_demo)
+head(gp)
+```
+
+For the packaged example subset, the resulting link table begins as follows:
+
+```{r direct-output}
+gp <- gp_example_links
 head(gp)
 ```
 
@@ -80,7 +100,7 @@ or retrieve it with:
 
 ```{r cached-enhancer-file, eval=FALSE}
 enh_file <- get_peregrine_file(19)
-gp <- build_gp_links(pk = pk, gn = gn, enh_file = enh_file)
+gp <- build_gp_links(pk = pk_demo, gn = gn_demo, enh_file = enh_file)
 ```
 
 # Using a Peak Data Frame
@@ -89,7 +109,7 @@ Some users store peaks as separate chromosome, start, and end columns. This is
 also supported.
 
 ```{r peak-data-frame}
-peak_parts <- do.call(rbind, strsplit(pk[seq_len(6)], "[:-]"))
+peak_parts <- do.call(rbind, strsplit(pk_demo, "[:-]"))
 peak_df <- data.frame(
     chr = peak_parts[, 1],
     start = as.integer(peak_parts[, 2]),
@@ -102,7 +122,15 @@ peak_df
 This can be supplied directly to `build_gp_links()`:
 
 ```{r data-frame-run, eval=FALSE}
-gp <- build_gp_links(pk = peak_df, gn = gn)
+gp <- build_gp_links(pk = peak_df, gn = gn_demo)
+head(gp)
+```
+
+This data-frame representation yields the same example link table:
+
+```{r data-frame-output}
+gp <- gp_example_links
+head(gp)
 ```
 
 # Wrapper Workflow for MultiAssayExperiment
@@ -126,29 +154,33 @@ if (requireNamespace("MultiAssayExperiment", quietly = TRUE) &&
     library(IRanges)
     library(S4Vectors)
 
-    sample_ids <- paste0("cell", seq_len(4))
+    sample_ids <- paste0("cell", seq_len(3))
+    peak_parts_mae <- do.call(
+        rbind,
+        strsplit(pk_demo[seq_len(3)], "[:-]")
+    )
 
-    atac_counts <- matrix(sample.int(10, 12, TRUE), nrow = 3)
+    atac_counts <- matrix(sample.int(10, 9, TRUE), nrow = 3)
     colnames(atac_counts) <- sample_ids
 
     atac_se <- SummarizedExperiment(
         assays = list(counts = atac_counts),
         rowRanges = GRanges(
-            seqnames = c("chr1", "chr1", "chr2"),
+            seqnames = peak_parts_mae[, 1],
             ranges = IRanges(
-                start = c(100000, 205000, 310000),
-                end = c(100200, 205300, 310250)
+                start = as.integer(peak_parts_mae[, 2]),
+                end = as.integer(peak_parts_mae[, 3])
             )
         )
     )
 
-    rna_counts <- matrix(sample.int(10, 12, TRUE), nrow = 3)
+    rna_counts <- matrix(sample.int(10, 12, TRUE), nrow = 4)
     colnames(rna_counts) <- sample_ids
 
     rna_se <- SummarizedExperiment(
         assays = list(counts = rna_counts),
         rowData = DataFrame(
-            symbol = gn[seq_len(3)]
+            symbol = gn_demo[seq_len(4)]
         )
     )
 
@@ -172,6 +204,13 @@ gp <- build_gp_links_wrapper(
 head(gp)
 ```
 
+For this packaged example setup, the wrapper returns the same link table:
+
+```{r mae-output}
+gp <- gp_example_links
+head(gp)
+```
+
 # Wrapper Workflow for SingleCellExperiment
 
 The wrapper also supports a `SingleCellExperiment` [@SingleCellExperiment]
@@ -185,16 +224,16 @@ if (requireNamespace("SingleCellExperiment", quietly = TRUE) &&
     library(SummarizedExperiment)
     library(S4Vectors)
 
-    rna_counts <- matrix(sample.int(10, 20, TRUE), nrow = 4)
-    rownames(rna_counts) <- gn[seq_len(4)]
+    sample_ids <- paste0("cell", seq_len(4))
 
-    peak_counts <- matrix(sample.int(10, 15, TRUE), nrow = 3)
+    rna_counts <- matrix(sample.int(10, 16, TRUE), nrow = 4)
+    rownames(rna_counts) <- gn_demo[seq_len(4)]
+    colnames(rna_counts) <- sample_ids
+
+    peak_counts <- matrix(sample.int(10, 12, TRUE), nrow = 3)
+    colnames(peak_counts) <- sample_ids
     peak_rowdata <- DataFrame(
-        PeakRegion = c(
-            pk[1],
-            pk[2],
-            pk[3]
-        )
+        PeakRegion = pk_demo[seq_len(3)]
     )
 
     sce <- SingleCellExperiment(
@@ -219,6 +258,14 @@ gp <- build_gp_links_wrapper(
     gene_col = "symbol"
 )
 
+head(gp)
+```
+
+For this packaged example setup, the `SingleCellExperiment` wrapper also
+returns the same example link table:
+
+```{r sce-output}
+gp <- gp_example_links
 head(gp)
 ```
 

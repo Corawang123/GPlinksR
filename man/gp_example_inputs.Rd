@@ -13,7 +13,9 @@ A list with two elements:
 \description{
 A small example dataset for demonstrating \code{GPlinksR} workflows.
 The object contains 300 peak coordinates and 100 gene symbols suitable for
-examples and vignettes.
+examples and vignettes. The first few entries are curated so that the
+vignette examples produce enhancer-, promoter-, and closest-based links from
+the packaged data.
 }
 \usage{data(gp_example_inputs)}
 \examples{

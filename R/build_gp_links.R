@@ -18,8 +18,9 @@ utils::globalVariables(c("Gene"))
 #'
 #'
 #' @examples
-#' pk <- c("chr1:819770-822338", "chr1:983871-984475")
-#' gn <- c("TTLL10", "PERM1")
+#' data("gp_example_inputs", package = "GPlinksR")
+#' pk <- gp_example_inputs$pk[seq_len(3)]
+#' gn <- gp_example_inputs$gn[seq_len(4)]
 #'
 #' gp <- build_gp_links(pk, gn)
 #' head(gp)
@@ -239,8 +240,9 @@ build_gp_links <- function(pk, gn, ver = 19, enh_file = NULL) {
     enh_sub <- enh_raw[enh_raw$HGNC %in% gn_ids, ]
 
     message("Loading enhancer coordinates...")
+    enh_coords_file <- .get_peregrine_enhancer_coords_file()
     enh_reg <- data.table::fread(
-        "https://data.pantherdb.org/ftp/peregrine_data/PEREGRINEenhancershg38",
+        enh_coords_file,
         sep = "\t",
         header = FALSE,
         col.names = c("chr", "start", "end", "enhancer")

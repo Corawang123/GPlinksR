@@ -28,8 +28,9 @@ Closest-gene mappings are based on distance from each peak to gene TSS.
 Build Gene-Peak Network (Enhancer, Promoter, Closest)
 }
 \examples{
-pk <- c("chr1:819770-822338", "chr1:983871-984475")
-gn <- c("TTLL10", "PERM1")
+data("gp_example_inputs", package = "GPlinksR")
+pk <- gp_example_inputs$pk[seq_len(3)]
+gn <- gp_example_inputs$gn[seq_len(4)]
 
 gp <- build_gp_links(pk, gn)
 head(gp)
