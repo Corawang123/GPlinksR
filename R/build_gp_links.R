@@ -12,18 +12,23 @@ utils::globalVariables(c("Gene"))
 #' @param ver Integer (17, 18, or 19) - PANTHER enhancer-gene link version.
 #' @param enh_file Optional local path to enhancer-gene link file (.tsv).
 #'
-#' @return A data.frame with columns: Peak, Gene, Source.
+#' @return A data.frame with columns: Peak, Gene, Src.
 #'   Closest-gene mappings are based on distance from each peak to gene TSS.
 #' @export
 #'
 #'
 #' @examples
 #' data("gp_example_inputs", package = "GPlinksR")
+#' data("gp_example_links", package = "GPlinksR")
 #' pk <- gp_example_inputs$pk[seq_len(3)]
 #' gn <- gp_example_inputs$gn[seq_len(4)]
 #'
-#' gp <- build_gp_links(pk, gn)
-#' head(gp)
+#' head(gp_example_links)
+#'
+#' if (interactive()) {
+#'     gp <- build_gp_links(pk, gn)
+#'     head(gp)
+#' }
 build_gp_links <- function(pk, gn, ver = 19, enh_file = NULL) {
     message("Checking inputs...")
     .validate_build_gp_inputs(pk = pk, gn = gn, ver = ver, enh_file = enh_file)

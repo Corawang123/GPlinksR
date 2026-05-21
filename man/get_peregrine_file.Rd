@@ -18,8 +18,9 @@ The full path to the downloaded \code{.tsv} file stored in the
 Download Enhancer-Gene Link File from PANTHER Peregrine Database
 }
 \examples{
-f <- get_peregrine_file(19)
-f
-# inspect the first few lines
-readLines(f, n = 3)
+if (interactive()) {
+    f <- get_peregrine_file(19)
+    f
+    readLines(f, n = 3)
+}
 }

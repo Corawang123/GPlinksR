@@ -21,7 +21,7 @@ build_gp_links(pk, gn, ver = 19, enh_file = NULL)
 \item{enh_file}{Optional local path to enhancer-gene link file (.tsv).}
 }
 \value{
-A data.frame with columns: Peak, Gene, Source.
+A data.frame with columns: Peak, Gene, Src.
 Closest-gene mappings are based on distance from each peak to gene TSS.
 }
 \description{
@@ -29,9 +29,14 @@ Build Gene-Peak Network (Enhancer, Promoter, Closest)
 }
 \examples{
 data("gp_example_inputs", package = "GPlinksR")
+data("gp_example_links", package = "GPlinksR")
 pk <- gp_example_inputs$pk[seq_len(3)]
 gn <- gp_example_inputs$gn[seq_len(4)]
 
-gp <- build_gp_links(pk, gn)
-head(gp)
+head(gp_example_links)
+
+if (interactive()) {
+    gp <- build_gp_links(pk, gn)
+    head(gp)
+}
 }

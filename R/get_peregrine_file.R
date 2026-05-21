@@ -8,10 +8,11 @@
 #' @export
 #'
 #' @examples
-#' f <- get_peregrine_file(19)
-#' f
-#' # inspect the first few lines
-#' readLines(f, n = 3)
+#' if (interactive()) {
+#'     f <- get_peregrine_file(19)
+#'     f
+#'     readLines(f, n = 3)
+#' }
 get_peregrine_file <- function(version = 19) {
     if (!requireNamespace("BiocFileCache", quietly = TRUE)) {
         stop("Package 'BiocFileCache' must be installed.")

@@ -5,10 +5,25 @@ It uses public enhancer-gene link data from **PANTHER / PEREGRINE (AnnoQ)**.
 
 ---
 
-## 🧩 Installation
+## Installation
 
-You can install the development version of **GPlinksR** directly from GitHub:
+Install **GPlinksR** with `BiocManager`:
 
 ```r
-# install.packages("devtools")
-remotes::install_git("git@github.com:Corawang123/GPlinksR.git")
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
+
+BiocManager::install("GPlinksR")
+```
+
+Until the package is available from Bioconductor, install the development
+version from GitHub:
+
+```r
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
+
+BiocManager::install("Corawang123/GPlinksR")
+```
