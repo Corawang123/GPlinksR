@@ -1,43 +1,95 @@
 # tests/testthat/test-build_gp_links.R
 
-# 1. Valid KPMP-style example (success case)
+.local_peregrine_files <- function() {
+    enh_file <- tempfile(fileext = ".tsv")
+    coords_file <- tempfile()
+
+    write.table(
+        data.frame(
+            enhancer = "EH1",
+            gene = "gene;HGNC=11998",
+            stringsAsFactors = FALSE
+        ),
+        file = enh_file,
+        sep = "\t",
+        quote = FALSE,
+        row.names = FALSE
+    )
+
+    write.table(
+        data.frame(
+            chr = "chr1",
+            start = 1050L,
+            end = 1150L,
+            enhancer = "EH1"
+        ),
+        file = coords_file,
+        sep = "\t",
+        quote = FALSE,
+        row.names = FALSE,
+        col.names = FALSE
+    )
+
+    list(enh_file = enh_file, coords_file = coords_file)
+}
+
+
+# 1. Valid deterministic example (success case)
 
 test_that(
-    "build_gp_links returns valid outputs for KPMP example peaks and genes",
+    "build_gp_links returns valid outputs for local example peaks and genes",
     {
-        skip_on_cran() # skip heavy online test for CRAN checks
-
-        # ---- Prepare input (real KPMP-style examples) ----
-        file_path <- get_peregrine_file(19)
-
-        test_peaks <- c(
-            "chr1:819770-822338",
-            "chr1:983871-984475"
+        local_files <- .local_peregrine_files()
+        testthat::local_mocked_bindings(
+            .map_genes_to_hgnc = function(gn) {
+                data.frame(
+                    hgnc_symbol = "TP53",
+                    hgnc_id = "HGNC:11998",
+                    stringsAsFactors = FALSE
+                )
+            },
+            .get_peregrine_enhancer_coords_file = function() {
+                local_files$coords_file
+            },
+            .build_promoter_links = function(pk_gr, gn, edb) {
+                data.frame(
+                    Peak = character(0),
+                    Gene = character(0),
+                    Src = character(0),
+                    stringsAsFactors = FALSE
+                )
+            },
+            .build_closest_links = function(pk_gr, gn, edb) {
+                data.frame(
+                    Peak = character(0),
+                    Gene = character(0),
+                    Src = character(0),
+                    stringsAsFactors = FALSE
+                )
+            },
+            .package = "GPlinksR"
         )
 
-        test_genes <- c("TTLL10", "PERM1")
+        test_peaks <- c(
+            "chr1:1000-1100",
+            "chr1:5000-5100"
+        )
 
-        # ---- Run ----
+        test_genes <- "TP53"
+
         result <- build_gp_links(
             pk = test_peaks,
             gn = test_genes,
-            enh_file = file_path
+            enh_file = local_files$enh_file
         )
 
-        # ---- Validate structure ----
         expect_s3_class(result, "data.frame")
         expect_true(all(c("Peak", "Gene", "Src") %in% colnames(result)))
-
-        # ---- Validate contents ----
         expect_gt(nrow(result), 0)
         expect_false(any(is.na(result$Gene)))
         expect_true(all(unique(result$Src) %in% c("enh", "prom", "clo")))
-
-        # ---- Check integrity ----
         expect_true(all(result$Peak %in% test_peaks))
-
-        # ---- Optional: check at least one enhancer link found ----
-        expect_true(any(result$Src == "enh"))
+        expect_true(any(result$Src == "enh" & result$Gene == "TP53"))
     }
 )
 
@@ -168,33 +220,22 @@ test_that("build_gp_links errors when enh_file does not exist", {
 # 11. Gene symbols cannot be mapped to HGNC
 
 test_that("build_gp_links errors when gene symbols cannot be mapped to HGNC", {
-    skip_on_cran() # biomaRt lookup
-
-    mart_available <- tryCatch(
-        {
-            mart <- biomaRt::useMart(
-                "ensembl",
-                dataset = "hsapiens_gene_ensembl"
-            )
-            biomaRt::getBM(
-                attributes = "hgnc_symbol",
-                filters = "hgnc_symbol",
-                values = "TP53",
-                mart = mart
-            )
-            TRUE
+    local_files <- .local_peregrine_files()
+    testthat::local_mocked_bindings(
+        .map_genes_to_hgnc = function(gn) {
+            stop("No HGNC IDs found for the provided gene symbols.")
         },
-        error = function(e) FALSE
+        .get_peregrine_enhancer_coords_file = function() {
+            local_files$coords_file
+        },
+        .package = "GPlinksR"
     )
-
-    if (!mart_available) {
-        skip("biomaRt service unavailable")
-    }
 
     expect_error(
         build_gp_links(
             pk = "chr1:1000-2000",
-            gn = "THISISNOTAREALGENE"
+            gn = "THISISNOTAREALGENE",
+            enh_file = local_files$enh_file
         ),
         "No HGNC IDs found"
     )
